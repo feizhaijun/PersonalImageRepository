@@ -1,0 +1,65 @@
+pipeline_name: OCR
+
+text_type: general
+
+use_doc_preprocessor: False
+use_textline_orientation: False
+
+SubPipelines:
+  DocPreprocessor:
+    pipeline_name: doc_preprocessor
+    use_doc_orientation_classify: True
+    use_doc_unwarping: True
+    SubModules:
+      DocOrientationClassify:
+        module_name: doc_text_orientation
+        model_name: PP-LCNet_x1_0_doc_ori
+        model_dir: null
+        hpi_config:
+          auto_config: False
+          backend: om
+          device_type: npu
+      DocUnwarping:
+        module_name: image_unwarping
+        model_name: UVDoc
+        model_dir: null
+        hpi_config:
+          auto_config: False
+          backend: onnxruntime
+          device_type: cpu
+
+
+SubModules:
+  TextDetection:
+    module_name: text_detection
+    model_name: PP-OCRv5_server_det
+    model_dir: /root/.paddlex/PP-OCRv5_server_det
+    limit_side_len: 960
+    limit_type: max
+    max_side_limit: 4000
+    thresh: 0.3
+    box_thresh: 0.6
+    unclip_ratio: 1.5
+    hpi_config:
+      auto_config: False
+      backend: onnxruntime
+      device_type: cpu
+  TextLineOrientation:
+    module_name: textline_orientation
+    model_name: PP-LCNet_x1_0_textline_ori
+    model_dir: null
+    batch_size: 1
+    hpi_config:
+      auto_config: False
+      backend: om
+      device_type: npu
+  TextRecognition:
+    module_name: text_recognition
+    model_name: PP-OCRv5_server_rec
+    model_dir: /root/.paddlex/PP-OCRv5_server_rec
+    batch_size: 1
+    score_thresh: 0.0
+    hpi_config:
+      auto_config: False
+      backend: onnxruntime
+      device_type: cpu
